@@ -1,4 +1,5 @@
 name: ⛅ Deploy Workers
+
 on:
   push:
     branches:
@@ -7,18 +8,27 @@ on:
     branches:
       - 'master'
   repository_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      - run: npm i
-      - run: sed -i s/KV_NAME/${{ secrets.KV_NAME }}/g wrangler.toml
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Update wrangler.toml
+        run: sed -i "s/KV_NAME/${{ secrets.KV_NAME }}/g" wrangler.toml
+      
       - name: Build & Deploy Worker
         uses: cloudflare/wrangler-action@v3
         with:
